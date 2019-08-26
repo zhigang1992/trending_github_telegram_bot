@@ -13,6 +13,10 @@
   "dependencies": {
     "dotenv": "^8.1.0",
     "memjs": "^1.2.2",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "telegraf": "^3.32.0"
+  },
+  "scripts": {
+    "build": "tsc"
   }
 }

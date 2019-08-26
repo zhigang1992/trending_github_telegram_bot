@@ -1,14 +1,64 @@
 import dotenv from 'dotenv';
 import {Client} from 'memjs';
+import Telegraf from 'telegraf'
+import fetch from 'node-fetch';
 
 dotenv.config();
 
-(async () => {
-  const client = Client.create(process.env.MEMCACHIER_SERVER_STRING);
-  const value = Buffer.from("sup", "utf-8");
-  await client.set('hello', value, {expires: 0});
-  const {value: getValue} = await client.get('hello');
-  console.log(getValue.toString('utf-8'));
-})();
+interface Repo {
+  author: string;
+  name: string;
+  avatar: string;
+  url: string;
+  description:string;
+  stars: number;
+  forks: number;
+  currentPeriodStars: number;
+  builtBy: Array<{
+    href: string;
+    avatar: string;
+    username: string;
+  }>
+}
+
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
+
+async function sendToTelegram(repo: Repo) {
+  const description = `[${repo.author}/${repo.name}](${repo.url}) 
+`;
+  await bot.telegram.sendMessage('@trending_github', description, {
+    parse_mode: 'Markdown'
+  })
+}
+
+const client = Client.create(process.env.MEMCACHIER_SERVER_STRING);
+
+async function getFromMemCache(url: string): Promise<Repo | null> {
+  const {value} = await client.get(url);
+  if (value == null) {
+    return null
+  }
+  return JSON.parse(value.toString('utf-8'));
+}
+
+async function saveToMemCache(repo: Repo) {
+  await client.set(repo.url, JSON.stringify(repo), {expires: 0});
+}
+
+async function getUpdates(): Promise<Repo[]> {
+  const response = await fetch('https://github-trending-api.now.sh/repositories');
+  return await response.json()
+}
+
+export const handler = async () => {
+  const repos = await getUpdates();
+  for (const repo of repos) {
+    const cached = await getFromMemCache(repo.url);
+    if (cached == null || repo.stars - cached.stars > 500) {
+      await sendToTelegram(repo);
+      await saveToMemCache(repo);
+    }
+  }
+};
 
 
