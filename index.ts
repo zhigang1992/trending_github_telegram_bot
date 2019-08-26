@@ -52,13 +52,13 @@ async function getUpdates(): Promise<Repo[]> {
 
 export const handler = async () => {
   const repos = await getUpdates();
-  for (const repo of repos) {
+  await Promise.all(repos.map(async repo => {
     const cached = await getFromMemCache(repo.url);
     if (cached == null || repo.stars - cached.stars > 500) {
       await sendToTelegram(repo);
       await saveToMemCache(repo);
     }
-  }
+  }))
 };
 
 
