@@ -53,6 +53,9 @@ async function getUpdates(): Promise<Repo[]> {
 export const handler = async () => {
   const repos = await getUpdates();
   await Promise.all(repos.map(async repo => {
+    if (repo.stars < 100) {
+      return;
+    }
     const cached = await getFromMemCache(repo.url);
     if (cached == null || repo.stars - cached.stars > 500) {
       await sendToTelegram(repo);
