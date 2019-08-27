@@ -4,21 +4,21 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "prettier": "^1.18.2"
+    "@types/dotenv": "^6.1.1",
+    "@types/memjs": "^1.2.1",
+    "@types/node-fetch": "^2.5.0",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
   },
   "dependencies": {
     "dotenv": "^8.1.0",
     "memjs": "^1.2.2",
     "node-fetch": "^2.6.0",
-    "@types/dotenv": "^6.1.1",
-    "@types/memjs": "^1.2.1",
-    "@types/node-fetch": "^2.5.0",
-    "ts-node": "^8.3.0",
-    "typescript": "^3.5.3",
     "telegraf": "^3.32.0"
   },
   "scripts": {
     "build": "tsc",
-    "start": "ts-node index.ts"
+    "start": "node dist/index.js"
   }
 }
