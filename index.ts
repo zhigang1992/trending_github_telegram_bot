@@ -10,7 +10,7 @@ interface Repo {
   name: string;
   avatar: string;
   url: string;
-  description:string;
+  description: string;
   stars: number;
   forks: number;
   currentPeriodStars: number;
@@ -26,7 +26,7 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 async function sendToTelegram(repo: Repo) {
   const description = `[${repo.author}/${repo.name}](${repo.url}) 
 `;
-  await bot.telegram.sendMessage('@trending_github', description, {
+  await bot.telegram.sendMessage(process.env.TELEGRAM_CHANNEL_ID!, description, {
     parse_mode: 'Markdown'
   })
 }
@@ -50,7 +50,7 @@ async function getUpdates(): Promise<Repo[]> {
   return await response.json()
 }
 
-export const handler = async () => {
+async function main() {
   const repos = await getUpdates();
   await Promise.all(repos.map(async repo => {
     if (repo.stars < 100) {
@@ -61,7 +61,12 @@ export const handler = async () => {
       await sendToTelegram(repo);
       await saveToMemCache(repo);
     }
-  }))
-};
+  }));
+}
 
-
+main()
+  .then(() => { process.exit(0); })
+  .catch(e => {
+    console.error(e);
+    process.exit(1);
+  });
