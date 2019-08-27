@@ -57,7 +57,7 @@ async function main() {
       return;
     }
     const cached = await getFromMemCache(repo.url);
-    if (cached == null || repo.stars - cached.stars > 500) {
+    if (cached == null) {
       await sendToTelegram(repo);
       await saveToMemCache(repo);
     }
